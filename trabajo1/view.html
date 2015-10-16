@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Computación gráfica - Trabajo 1</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+      noscript { font-weight: bold; color: #aa0000; }
+    </style>
+  </head>
+  <body>
+    <noscript>Necesita activar javascript para ver el programa</noscript>
+    <p>Funciones para probar:</p>
+    <ul>
+      <li title="Paraboloide hiperbólico">Math.pow(x / 4, 2) - Math.pow(y / 7, 2)</li>
+      <li title="Función de Himmelblau">Math.pow(x * x + y - 11, 2) + Math.pow(x + y * y - 7, 2)</li>
+      <li title="Función de Booth">Math.pow(x + 2 * y - 7, 2) + Math.pow(2 * x + y - 5, 2)</li>
+    </ul>
+    <p>Ecuación de superficie: <input type="text" id="formula" value="Math.sin(x * y)"><button type="button" id="input-formula">Ingresar ecuación</button></p>
+    <div id="container"></div>
+    <script src="lib.js"></script>
+    <script src="main.js"></script>
+    <script>
+var camera, scene, renderer;
+var cameraControls;
+var clock = new THREE.Clock();
+
+var wrappedScene = {
+    objects: [],
+    add: function(o) {
+        scene.add(o);
+        this.objects.push(o);
+    },
+    empty: function() {
+        this.objects.forEach(function(o) {
+            scene.remove(o);
+        });
+        this.objects = [];
+    }
+};
+
+window.targetFunction = null;
+
+var loadFunction = function() {
+    var f = lib.parseFunction(document.getElementById("formula").value);
+    if (f !== undefined) {
+        window.targetFunction = f;
+    }
+};
+
+var init = function() {
+    var canvasWidth = 600;
+    var canvasHeight = 500;
+    var canvasRatio = canvasWidth / canvasHeight;
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.setSize(canvasWidth, canvasHeight);
+    renderer.setClearColor(new THREE.Color(0xAAAAAA), 1.0);
+    camera = new THREE.PerspectiveCamera(45, canvasRatio, 1, 40000);
+    camera.position.set(700, 500, 1600);
+    cameraControls = new THREE.OrbitAndPanControls(camera, renderer.domElement);
+    cameraControls.target.set(0,250,0);
+    fillScene();
+};
+
+var addToDOM = function() {
+    var container = document.getElementById('container');
+    var canvas = document.getElementsByTagName('canvas');
+    if (canvas.length > 0)
+        container.removeChild(canvas[0]);
+    container.appendChild(renderer.domElement);
+};
+
+var fillScene = function() {
+    scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x808080, 3000, 6000);
+    var ambientLight = new THREE.AmbientLight(0x222222);
+    var light = new THREE.DirectionalLight(0xffffff, 1.0);
+    light.position.set(200, 400, 500);
+    var light2 = new THREE.DirectionalLight(0xffffff, 1.0);
+    light2.position.set(-400, 200, -300);
+    scene.add(ambientLight);
+    scene.add(light);
+    scene.add(light2);
+    scene.add(camera);
+    draw(wrappedScene);
+}
+
+var animate = function() {
+    window.requestAnimationFrame(animate);
+    render();
+};
+
+var render = function() {
+    var delta = clock.getDelta();
+    cameraControls.update(delta);
+    renderer.render(scene, camera);
+};
+
+window.onload = function() {
+    if (typeof draw === "undefined")
+        return console.warn("El procedimiento draw no existe");
+    document.getElementById("input-formula").addEventListener("click", function() {
+        loadFunction();
+        wrappedScene.empty();
+        draw(wrappedScene);
+        render();
+    });
+    try {
+        loadFunction();
+        init();
+        addToDOM();
+        animate();
+    } catch (e) {
+        console.error(e);
+    }
+};
+    </script>
+  </body>
+</html>
