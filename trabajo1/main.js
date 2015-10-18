@@ -30,8 +30,8 @@ var ground = function(scene) {
 // la función matemática ingresada está disponible en la variable targetFunction
 // si targetFunction es null, todavía no se ha ingresado ninguna fórmula válida
 
-var dominio = 5; // +- el dominio de la funcion
-var salto=1;//1;
+var dominio = 10; // +- el dominio de la funcion
+var salto=.5;//1;
 var amplificar = 600/dominio;//120;
 var ajuste = 9.5;
 
